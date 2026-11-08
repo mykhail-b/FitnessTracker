@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FitnessTracker.Application/FitnessTracker.Application.csproj" Id="57848734-f1ac-42bb-9a3b-9d64b08729de" />
+    <Project Path="src/FitnessTracker.Domain/FitnessTracker.Domain.csproj" Id="45630017-106b-40f7-98d3-6c56326eb625" />
+    <Project Path="src/FitnessTracker.Infrastructure/FitnessTracker.Infrastructure.csproj" Id="f8b44abd-2569-44f7-a9d3-c77088a9fcbf" />
+    <Project Path="src/FitnessTracker.API/FitnessTracker.API.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Playwright.Tests/Playwright.Tests.csproj" />
+    <Project Path="tests/Unit.Tests/UnitTests.csproj" />
+  </Folder>
+</Solution>
