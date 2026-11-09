@@ -1,28 +1,25 @@
 
 using FitnessTracker.Application.Features.Exercises.Queries;
 using FitnessTracker.Application.Features.Exercises.Responses;
-using FitnessTracker.Infrastructure.Data;
+using FitnessTracker.Domain.Repository;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace FitnessTracker.Application.Features.Exercises.Handlers;
 
 public class GetExerciseByIdHandler : IRequestHandler<GetExerciseByIdQuery, ExerciseResponse?>
 {
-    private readonly AppDbContext _db;
+    private readonly IExerciseRepository _exerciseRepository;
 
-    public GetExerciseByIdHandler(AppDbContext db)
+    public GetExerciseByIdHandler(IExerciseRepository exerciseRepository)
     {
-        _db = db;
+        _exerciseRepository = exerciseRepository;
     }
 
     public async Task<ExerciseResponse?> Handle(
         GetExerciseByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var exercise = await _db.Exercises
-            .AsNoTracking()
-            .SingleOrDefaultAsync(item => item.Id == request.ExerciseId, cancellationToken);
+        var exercise = await _exerciseRepository.GetReadOnlyByIdAsync(request.ExerciseId, cancellationToken);
 
         return exercise is null
             ? null

@@ -19,6 +19,7 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
     public DbSet<WorkoutSet> WorkoutSets => Set<WorkoutSet>();
     public DbSet<Meal> Meals => Set<Meal>();
     public DbSet<MealItem> MealItems => Set<MealItem>();
+    public DbSet<Food> Foods => Set<Food>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -63,5 +64,34 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
             .HasForeignKey(ws => ws.ExerciseId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Food>(entity =>
+        {
+            entity.Property(food => food.Name).HasMaxLength(100).IsRequired();
+            entity.Property(food => food.CaloriesPer100g).HasPrecision(18, 4);
+            entity.Property(food => food.ProteinPer100g).HasPrecision(18, 4);
+            entity.Property(food => food.FatPer100g).HasPrecision(18, 4);
+            entity.Property(food => food.CarbsPer100g).HasPrecision(18, 4);
+        });
+
+        modelBuilder.Entity<Meal>(entity =>
+        {
+            entity.Property(meal => meal.Name).HasMaxLength(100).IsRequired();
+            entity.HasMany(meal => meal.Items)
+                .WithOne()
+                .HasForeignKey(item => item.MealId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<MealItem>(entity =>
+        {
+            entity.Property(item => item.Grams).HasPrecision(18, 2);
+            entity.HasOne(item => item.Food)
+                .WithMany()
+                .HasForeignKey(item => item.FoodId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+        });
     }
 }

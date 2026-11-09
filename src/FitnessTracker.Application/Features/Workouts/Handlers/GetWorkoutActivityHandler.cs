@@ -1,39 +1,30 @@
 using FitnessTracker.Application.Features.Workouts.Queries;
-using FitnessTracker.Infrastructure.Data;
+using FitnessTracker.Domain.Repository;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace FitnessTracker.Application.Features.Workouts.Handlers;
 
 public class GetWorkoutActivityHandler : IRequestHandler<GetWorkoutActivityQuery, List<DateOnly>>
 {
-    private readonly AppDbContext _db;
+    private readonly IWorkoutRepository _workoutRepository;
+    private readonly IUserProfileRepository _userProfileRepository;
 
-    public GetWorkoutActivityHandler(AppDbContext db)
+    public GetWorkoutActivityHandler(
+        IWorkoutRepository workoutRepository,
+        IUserProfileRepository userProfileRepository)
     {
-        _db = db;
+        _workoutRepository = workoutRepository;
+        _userProfileRepository = userProfileRepository;
     }
 
     public async Task<List<DateOnly>> Handle(
         GetWorkoutActivityQuery request,
         CancellationToken cancellationToken)
     {
-        var userId = await _db.UserProfiles
-            .Where(profile => profile.IdentityId == request.IdentityId)
-            .Select(profile => (Guid?)profile.Id)
-            .SingleOrDefaultAsync(cancellationToken);
-        if (userId is null) return [];
+        var user = await _userProfileRepository.GetByIdentityIdAsync(request.IdentityId, cancellationToken);
+        if (user is null) return [];
 
-        var dates = await _db.Workouts
-            .AsNoTracking()
-            .Where(workout => workout.UserId == userId)
-            .Select(workout => workout.Date)
-            .ToListAsync(cancellationToken);
-
-        return dates
-            .Select(DateOnly.FromDateTime)
-            .Distinct()
-            .Order()
-            .ToList();
+        var dates = await _workoutRepository.GetActivityDatesAsync(user.Id, cancellationToken);
+        return dates.ToList();
     }
 }

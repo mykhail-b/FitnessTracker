@@ -1,5 +1,6 @@
 using System.Text;
 using FitnessTracker.Application;
+using FitnessTracker.Infrastructure;
 using FitnessTracker.Infrastructure.Data;
 using FitnessTracker.Infrastructure.Services;
 using FitTrackApi.Server.Services;
@@ -22,6 +23,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddIdentityCore<IdentityUser>().AddEntityFrameworkStores<AppDbContext>();
 
+builder.Services.AddInfrastructure();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 

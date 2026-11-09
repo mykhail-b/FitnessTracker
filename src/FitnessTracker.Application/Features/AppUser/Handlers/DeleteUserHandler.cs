@@ -1,27 +1,25 @@
 using FitnessTracker.Application.Features.AppUser.Commands;
-using FitnessTracker.Infrastructure.Data;
+using FitnessTracker.Domain.Repository;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace FitnessTracker.Application.Features.AppUser.Handlers;
 
 public class DeleteUserHandler : IRequestHandler<DeleteUserCommand, bool>
 {
-    private readonly AppDbContext _db;
+    private readonly IUserProfileRepository _userProfileRepository;
 
-    public DeleteUserHandler(AppDbContext db)
+    public DeleteUserHandler(IUserProfileRepository userProfileRepository)
     {
-        _db = db;
+        _userProfileRepository = userProfileRepository;
     }
 
     public async Task<bool> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await _db.UserProfiles
-            .SingleOrDefaultAsync(profile => profile.IdentityId == request.IdentityId, cancellationToken);
+        var user = await _userProfileRepository.GetTrackedByIdentityIdAsync(request.IdentityId, cancellationToken);
         if (user is null) return false;
 
-        _db.UserProfiles.Remove(user);
-        await _db.SaveChangesAsync(cancellationToken);
+        _userProfileRepository.Remove(user);
+        await _userProfileRepository.SaveChangesAsync(cancellationToken);
         return true;
     }
 }

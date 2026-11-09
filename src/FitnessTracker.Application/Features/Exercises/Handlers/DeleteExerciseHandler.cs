@@ -1,27 +1,25 @@
 using FitnessTracker.Application.Features.Exercises.Commands;
-using FitnessTracker.Infrastructure.Data;
+using FitnessTracker.Domain.Repository;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace FitnessTracker.Application.Features.Exercises.Handlers;
 
 public class DeleteExerciseHandler : IRequestHandler<DeleteExerciseCommand, bool>
 {
-    private readonly AppDbContext _db;
+    private readonly IExerciseRepository _exerciseRepository;
 
-    public DeleteExerciseHandler(AppDbContext db)
+    public DeleteExerciseHandler(IExerciseRepository exerciseRepository)
     {
-        _db = db;
+        _exerciseRepository = exerciseRepository;
     }
 
     public async Task<bool> Handle(DeleteExerciseCommand request, CancellationToken cancellationToken)
     {
-        var exercise = await _db.Exercises
-            .SingleOrDefaultAsync(item => item.Id == request.ExerciseId, cancellationToken);
+        var exercise = await _exerciseRepository.GetByIdAsync(request.ExerciseId, cancellationToken);
         if (exercise is null) return false;
 
-        _db.Exercises.Remove(exercise);
-        await _db.SaveChangesAsync(cancellationToken);
+        _exerciseRepository.Remove(exercise);
+        await _exerciseRepository.SaveChangesAsync(cancellationToken);
         return true;
     }
 }

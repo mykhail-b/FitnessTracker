@@ -1,36 +1,32 @@
 using FitnessTracker.Application.Features.Workouts.Queries;
 using FitnessTracker.Application.Features.Workouts.Responses;
-using FitnessTracker.Infrastructure.Data;
+using FitnessTracker.Domain.Repository;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace FitnessTracker.Application.Features.Workouts.Handlers;
 
 public class GetWorkoutByIdHandler : IRequestHandler<GetWorkoutByIdQuery, WorkoutResponse?>
 {
-    private readonly AppDbContext _db;
+    private readonly IWorkoutRepository _workoutRepository;
+    private readonly IUserProfileRepository _userProfileRepository;
 
-    public GetWorkoutByIdHandler(AppDbContext db)
+    public GetWorkoutByIdHandler(
+        IWorkoutRepository workoutRepository,
+        IUserProfileRepository userProfileRepository)
     {
-        _db = db;
+        _workoutRepository = workoutRepository;
+        _userProfileRepository = userProfileRepository;
     }
 
-    public async Task<WorkoutResponse?> Handle(
-        GetWorkoutByIdQuery request,
-        CancellationToken cancellationToken)
+    public async Task<WorkoutResponse?> Handle(GetWorkoutByIdQuery request, CancellationToken cancellationToken)
     {
-        var userId = await _db.UserProfiles
-            .Where(profile => profile.IdentityId == request.IdentityId)
-            .Select(profile => (Guid?)profile.Id)
-            .SingleOrDefaultAsync(cancellationToken);
-        if (userId is null) return null;
+        var user = await _userProfileRepository.GetByIdentityIdAsync(request.IdentityId, cancellationToken);
+        if (user is null) return null;
 
-        var workout = await _db.Workouts
-            .AsNoTracking()
-            .Include(item => item.WorkoutSets)
-            .SingleOrDefaultAsync(
-                item => item.Id == request.WorkoutId && item.UserId == userId,
-                cancellationToken);
+        var workout = await _workoutRepository.GetByIdWithSetsAsync(
+            request.WorkoutId,
+            user.Id,
+            cancellationToken);
 
         return workout is null ? null : WorkoutResponse.FromEntity(workout);
     }

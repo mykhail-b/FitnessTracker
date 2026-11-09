@@ -1,27 +1,24 @@
 using FitnessTracker.Application.Features.AppUser.Queries;
 using FitnessTracker.Application.Features.AppUser.Responses;
-using FitnessTracker.Infrastructure.Data;
+using FitnessTracker.Domain.Repository;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace FitnessTracker.Application.Features.AppUser.Handlers;
 
 public class GetUserHandler : IRequestHandler<GetUserQuery, UserProfileResponse?>
 {
-    private readonly AppDbContext _db;
+    private readonly IUserProfileRepository _userProfileRepository;
 
-    public GetUserHandler(AppDbContext db)
+    public GetUserHandler(IUserProfileRepository userProfileRepository)
     {
-        _db = db;
+        _userProfileRepository = userProfileRepository;
     }
 
     public async Task<UserProfileResponse?> Handle(
         GetUserQuery request,
         CancellationToken cancellationToken)
     {
-        var user = await _db.UserProfiles
-            .AsNoTracking()
-            .SingleOrDefaultAsync(profile => profile.IdentityId == request.IdentityId, cancellationToken);
+        var user = await _userProfileRepository.GetByIdentityIdAsync(request.IdentityId, cancellationToken);
 
         return user is null
             ? null

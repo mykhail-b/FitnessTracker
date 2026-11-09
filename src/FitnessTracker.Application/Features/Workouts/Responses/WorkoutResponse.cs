@@ -17,10 +17,3 @@ public record WorkoutResponse(
                 .Select(set => new WorkoutSetResponse(set.Id, set.ExerciseId, set.SetNumber, set.Reps, set.Weight))
                 .ToList());
 }
-
-public record WorkoutSetResponse(
-    Guid Id,
-    Guid ExerciseId,
-    int SetNumber,
-    int Reps,
-    decimal Weight);

@@ -1,6 +1,6 @@
 using FitnessTracker.Application.Features.Exercises.Responses;
-using FitnessTracker.Infrastructure.Data;
 using FitnessTracker.Domain.Entity;
+using FitnessTracker.Domain.Repository;
 using MediatR;
 using FitnessTracker.Application.Features.Exercises.Commands;
 
@@ -8,11 +8,11 @@ namespace FitnessTracker.Application.Features.Exercises.Handlers;
 
 public class CreateExerciseHandler : IRequestHandler<CreateExerciseCommand, ExerciseResponse>
 {
-    private readonly AppDbContext _db;
+    private readonly IExerciseRepository _exerciseRepository;
 
-    public CreateExerciseHandler(AppDbContext db)
+    public CreateExerciseHandler(IExerciseRepository exerciseRepository)
     {
-        _db = db;
+        _exerciseRepository = exerciseRepository;
     }
 
     public async Task<ExerciseResponse> Handle(CreateExerciseCommand request, CancellationToken cancellationToken)
@@ -25,8 +25,8 @@ public class CreateExerciseHandler : IRequestHandler<CreateExerciseCommand, Exer
             request.Muscle,
             request.Instruction);
 
-        _db.Exercises.Add(exercise);
-        await _db.SaveChangesAsync(cancellationToken);
+        await _exerciseRepository.AddAsync(exercise, cancellationToken);
+        await _exerciseRepository.SaveChangesAsync(cancellationToken);
 
         return new ExerciseResponse(
             exercise.Id,

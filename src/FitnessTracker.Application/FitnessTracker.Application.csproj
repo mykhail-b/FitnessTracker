@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="MediatR" />
   </ItemGroup>
 
@@ -16,11 +15,10 @@
     <Folder Include="Features\Meals\Commands\" />
     <Folder Include="Features\Meals\Queries\" />
     <Folder Include="Features\Meals\Responses\" />
-    <Folder Include="Features\Workouts\Responses\" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FitnessTracker.Infrastructure\FitnessTracker.Infrastructure.csproj" />
+    <ProjectReference Include="..\FitnessTracker.Domain\FitnessTracker.Domain.csproj" />
   </ItemGroup>
 
 </Project>

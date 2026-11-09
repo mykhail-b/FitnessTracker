@@ -1,26 +1,24 @@
 using FitnessTracker.Application.Features.Exercises.Commands;
 using FitnessTracker.Application.Features.Exercises.Responses;
-using FitnessTracker.Infrastructure.Data;
+using FitnessTracker.Domain.Repository;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace FitnessTracker.Application.Features.Exercises.Handlers;
 
 public class UpdateExerciseHandler : IRequestHandler<UpdateExerciseCommand, ExerciseResponse?>
 {
-    private readonly AppDbContext _db;
+    private readonly IExerciseRepository _exerciseRepository;
 
-    public UpdateExerciseHandler(AppDbContext db)
+    public UpdateExerciseHandler(IExerciseRepository exerciseRepository)
     {
-        _db = db;
+        _exerciseRepository = exerciseRepository;
     }
 
     public async Task<ExerciseResponse?> Handle(
         UpdateExerciseCommand request,
         CancellationToken cancellationToken)
     {
-        var exercise = await _db.Exercises
-            .SingleOrDefaultAsync(item => item.Id == request.ExerciseId, cancellationToken);
+        var exercise = await _exerciseRepository.GetByIdAsync(request.ExerciseId, cancellationToken);
         if (exercise is null) return null;
 
         exercise.UpdateDetails(
@@ -29,7 +27,7 @@ public class UpdateExerciseHandler : IRequestHandler<UpdateExerciseCommand, Exer
             request.Category,
             request.Muscle,
             request.Instruction);
-        await _db.SaveChangesAsync(cancellationToken);
+        await _exerciseRepository.SaveChangesAsync(cancellationToken);
 
         return new ExerciseResponse(
             exercise.Id,
